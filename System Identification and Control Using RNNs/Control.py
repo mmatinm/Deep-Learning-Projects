@@ -126,9 +126,12 @@ plt.show()
 
 ############ training
 '''
-first we built a model consist of controller and plant. second we freezed the plant so its weights does'nt change
-in training. third we used the control systems approch to feed in the error and checking the output. 
-in the end we are trying to 
+in general a problem like this is not a supervised learning problem. we are trying to set position in a determined
+point called setpoint and the only thing we have is differense of setpoint and current position.  
+to solve this problem I used a trick and convert this problem to a supervised learning problem by stacking controller
+and plant as one model called "ctrlxplant". in this model the "trainedmodel" is the Neural Network model which i used for
+modelling the dynamic system at hand.(i have done this in "System Identification.py" file in this repository and the result is
+a model in keras format called "trained_SRNN_model.keras" )
 '''
 for layer in trainedmodel.layers:
     layer.trainable = False
