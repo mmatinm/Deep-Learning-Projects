@@ -231,4 +231,19 @@ plt.ylabel('Force')
 plt.title('Controller generated Force')
 plt.show()
 
+### evaluating the performance of Neural Net Controller (NNC)
+error = setpoint1 - outputn1.flatten()
+dt = 0.02
+# IAE: Integral of Absolute Error
+IAE = np.sum(np.abs(error)) * dt
+
+# ISE: Integral of Squared Error
+ISE = np.sum(error**2) * dt
+
+# RMSE: Root Mean Square Error
+RMSE = np.sqrt(np.mean(error**2))
+
+print(f"IAE: {IAE:.6f}")
+print(f"ISE: {ISE:.6f}")
+print(f"RMSE: {RMSE:.6f}")
 
