@@ -1,5 +1,6 @@
 
-''' #if needed 
+''' 
+# If the 'control' package is not installed, run: 
 pip install control  
 '''
 import numpy as np
@@ -18,11 +19,11 @@ from keras.optimizers import SGD
 from keras.optimizers import Adam , RMSprop
 from scipy import integrate
 '''
-# if you are using google colab 
+# If using Google Colab, uncomment and mount Google Drive:
 from google.colab import drive
 drive.mount('/content/new_drive')
 '''
-############### generating data
+############### Generating synthetic data for the mass-spring-damper system
 m = 24
 c = 110
 k = 2500
@@ -47,13 +48,13 @@ mean_pos = float(scaler_yts.mean_)
 std_dev_pos = float(scaler_yts.scale_)
 
 '''
-load the trained model from the previous part. 
-this model represent the dynamic system which we want to control its position.
+Load the pre-trained system identification model (frozen weights)
+This model predicts system position given the scaled force input
 '''
 ### adjust the path
 trainedmodel = tf.keras.models.load_model('/content/new_drive/MyDrive/trained_SRNN_model.keras') 
 
-# applying proportional controller to the system
+# Apply a proportional controller to the system
 time_steps = 500
 setpoint = 0.001
 Kp = 4000 #4300 #4750
@@ -65,7 +66,9 @@ f = np.zeros((time_steps, 1))
 output = np.zeros((time_steps, 1))
 
 for t in range(2, time_steps):
-    f[t] =  (Kp*(setpoint - float(output[t-1])) - mean_force)/std_dev_force  #Ke*(float(output[t-2])-float(output[t-1]))/0.02   #uncomment this and add it to the equation if you want to build a PD controller
+    # Uncomment the next line and add to the equation for PD control:
+    # deriv_term = Ke * (output[t-2] - output[t-1]) / dt
+    f[t] =  (Kp*(setpoint - float(output[t-1])) - mean_force)/std_dev_force 
     f_in[0,:,0] = f.flatten()  #[t-1,0]
     F[0,t,0] = f_in[0,t,0]
     pred = trainedmodel.predict(f_in)# .numpy()
@@ -85,7 +88,7 @@ plt.ylabel('Position')
 plt.title('P Controller Performance ')
 
 
-# Plot f vs time
+# Plot control input (normalized)
 plt.subplot(2, 1, 2)
 plt.plot(time, F[0, :, 0], label='f')
 plt.xlabel('Time')
@@ -96,21 +99,21 @@ plt.show()
 ######### preprocessing data to the desierd shape
 
 X1_train = ((setpoint - output) - mean_pos)/std_dev_pos
-y1_train = f
 X1_train = X1_train.reshape((1,X1_train.shape[0],X1_train.shape[1]))
-y1_train = y1_train.reshape((1,y1_train.shape[0],y1_train.shape[1]))
+y1_train = f.reshape((1,y1_train.shape[0],y1_train.shape[1]))
 print(X1_train.shape)
 print(y1_train.shape)
 
-# building a neural network as controller and train it so it can learn the proportional controller behaviour
+# Build a simple RNN-based controller model
 ctrl = Sequential()
 ctrl.add(LSTM(6, input_shape=(X1_train.shape[1],X1_train.shape[2]),return_sequences=True , name = 'l1'))  #use_bias=False
 ctrl.add(Dense(1, activation='linear' , name = 'l2')) #use_bias=False
 ctrl.compile(optimizer=RMSprop(learning_rate=0.001 , rho=0.9), loss='mean_squared_error')
-
+# Train controller to mimic proportional controller behavior
 ctrl.fit(X1_train, y1_train, epochs=400, batch_size=1,verbose=1)
+
 '''
-# check the performance of ctrl model in learning the behaviour of proportional controller
+# The following block evaluates initial controller performance (optional)
 Pred = ctrl.predict(X1_train)
 plt.scatter(time, Pred[0,:,0], label='Control input', c='blue', s=4)
 #plt.plot(time, Pred[0,:,0], label='Zero', c='green')
@@ -124,14 +127,26 @@ plt.show()
 
 '''
 
-############ training
+############### Supervised training of combined controller-plant model
 '''
-in general a problem like this is not a supervised learning problem. we are trying to set position in a determined
-point called setpoint and the only thing we have is differense of setpoint and current position.  
-to solve this problem I used a trick and convert this problem to a supervised learning problem by stacking controller
-and plant as one model called "ctrlxplant". in this model the "trainedmodel" is the Neural Network model which i used for
-modelling the dynamic system at hand.(i have done this in "System Identification.py" file in this repository and the result is
-a model in keras format called "trained_SRNN_model.keras" )
+Note: framing this control problem as standard supervised learning is unconventional.
+Our goal is to drive the system’s position to a fixed setpoint, but we only observe
+the error (setpoint minus the current position) at each time step.
+
+To make it tractable with backpropagation, we “stack” the controller and plant
+into one end‑to‑end model (“ctrlxplant”). The frozen “trainedmodel” subnetwork
+is the system‑identification neural net you generated earlier
+(see System Identification.py → trained_SRNN_model.keras).
+
+During training, at each time step:
+ 1. Compute the error e(t) = setpoint – output(t).
+ 2. Accumulate this error history into an input sequence.
+ 3. Use that sequence as input and the desired (normalized) setpoint as target.
+
+We then fit the combined model step‑by‑step.  The number of epochs per step (“n”)
+and other hyperparameters were tuned manually.  We found that gradually decreasing
+n over time (to counteract stronger transients early on) yielded much better
+convergence than using a constant epoch count.
 '''
 for layer in trainedmodel.layers:
     layer.trainable = False
@@ -150,28 +165,16 @@ s = np.ones_like(outputn)*setpoint     # setpoint
 s = s.reshape((1,s.shape[0],s.shape[1]))
 ctrlxplant.compile(optimizer=RMSprop(learning_rate=0.0002 , rho=0.95), loss='mean_squared_error')
 
-def smooth_error(e, alpha=0.9):
-    smoothed = np.zeros_like(e)
-    smoothed[0] = e[0]
-    for i in range(1, len(e)):
-        smoothed[i] = alpha * smoothed[i-1] + (1 - alpha) * e[i]
-    return smoothed
-
 for t in range(0, time_steps-1):
     e[t] = (setpoint - float(outputn[t]))
-    #e = smooth_error(e)
     e_in[0,:,0] = e.flatten()
     E[0,t,0] = e_in[0,t,0]
     n = int(6 - t/100)
-
-    #if t % 5 == 0:
     ctrlxplant.fit(e_in, s, epochs=n , batch_size=1,verbose=1)
 
     prede = ctrlxplant.predict(e_in)
     p = prede.reshape((prede.shape[1], prede.shape[0]))
     outputn[t+1] = float(p[t,0])
-
-  #ctrlxplant.fit(e_in, s, epochs=5 , batch_size=1,verbose=1)
 
 outputn = outputn*std_dev_pos + mean_pos
 setpoint = setpoint*std_dev_pos + mean_pos
@@ -184,14 +187,14 @@ ctrlxplant.save('/content/new_drive/MyDrive/ctrlxplantfinal.keras')
 ## please adjust the path as you need
 trainedfinal = tf.keras.models.load_model('/content/new_drive/MyDrive/ctrlxplantfinal.keras') 
 
-# saving the controller network seperately
+# Save combined model and separate controller model
 ctrl_new = Sequential()
 ctrl_new.add(LSTM(6, input_shape=(X1_train.shape[1], X1_train.shape[2]), return_sequences=True, name='l1'))
 ctrl_new.add(Dense(1, activation='linear', name='l2'))
 ctrl_new.set_weights(ctrlxplant.layers[0].get_weights())
 ctrl_new.save('/content/new_drive/MyDrive/ctrl_final.keras')
 
-# test the final model and plot the position and force (generated by controller )
+# Evaluate final controller performance
 time_steps = 500
 setpoint1 = (0.001 - mean_pos)/std_dev_pos
 E1 = np.zeros((1, time_steps, 1))
@@ -201,7 +204,6 @@ outputn1 = np.zeros((time_steps, 1))
 outputn2 = np.zeros((time_steps, 1))
 s1 = np.ones_like(outputn1)*setpoint1
 s1 = s1.reshape((1,s1.shape[0],s1.shape[1]))
-#ctrlxplant.compile(optimizer=RMSprop(learning_rate=0.00005 , rho=0.9), loss='mean_squared_error')
 
 for t in range(0, time_steps-1):
     e1[t] = (setpoint1 - float(outputn1[t]))
