@@ -243,8 +243,15 @@ ISE = np.sum(error**2) * dt
 
 # RMSE: Root Mean Square Error
 RMSE = np.sqrt(np.mean(error**2))
+relative_IAE = IAE / abs(setpoint1)
+relative_ISE = ISE / (setpoint1**2) 
+relative_RMSE = RMSE / abs(setpoint1)
 
 print(f"IAE: {IAE:.6f}")
 print(f"ISE: {ISE:.6f}")
 print(f"RMSE: {RMSE:.6f}")
+
+print(f"Relative IAE: {relative_IAE:.4f}")
+print(f"Relative ISE: {relative_ISE:.4f}")
+print(f"Relative RMSE: {relative_RMSE:.4f}")
 
