@@ -46,11 +46,14 @@ std_dev_force = float(scaler_Xts.scale_)
 mean_pos = float(scaler_yts.mean_)
 std_dev_pos = float(scaler_yts.scale_)
 
-# load the trained model from the previous part 
-trainedmodel = tf.keras.models.load_model('/content/new_drive/MyDrive/trained_SRNN.keras') ### adjust the path
+'''
+load the trained model from the previous part. 
+this model represent the dynamic system which we want to control its position.
+'''
+### adjust the path
+trainedmodel = tf.keras.models.load_model('/content/new_drive/MyDrive/trained_SRNN_model.keras') 
 
-
-# proportional controller 
+# applying proportional controller to the system
 time_steps = 500
 setpoint = 0.001
 Kp = 4000 #4300 #4750
@@ -79,6 +82,7 @@ plt.plot(time, output, label='Position')
 plt.plot(time, setpoint * np.ones_like(time), label='Setpoint', linestyle='--')
 #plt.xlabel('Time')
 plt.ylabel('Position')
+plt.title('P Controller Performance ')
 
 
 # Plot f vs time
@@ -92,8 +96,6 @@ plt.show()
 ######### preprocessing data to the desierd shape
 
 X1_train = ((setpoint - output) - mean_pos)/std_dev_pos
-#X1_train = np.column_stack((X1_train, np.zeros((X1_train.shape[0],1))))
-#y1_train = np.column_stack((f, np.zeros((f.shape[0],1))))
 y1_train = f
 X1_train = X1_train.reshape((1,X1_train.shape[0],X1_train.shape[1]))
 y1_train = y1_train.reshape((1,y1_train.shape[0],y1_train.shape[1]))
@@ -126,7 +128,7 @@ plt.show()
 '''
 first we built a model consist of controller and plant. second we freezed the plant so its weights does'nt change
 in training. third we used the control systems approch to feed in the error and checking the output. 
-in the end we are traying to 
+in the end we are trying to 
 '''
 for layer in trainedmodel.layers:
     layer.trainable = False
@@ -172,17 +174,12 @@ outputn = outputn*std_dev_pos + mean_pos
 setpoint = setpoint*std_dev_pos + mean_pos
 
 time = np.arange(time_steps)*0.02
-plt.plot(time, outputn, label='Position')
-plt.plot(time, setpoint * np.ones_like(time), label='Setpoint', linestyle='--')
-#plt.xlabel('Time')
-plt.ylabel('Position')
-plt.legend()
-plt.show()
 
 #save the trained model
 ctrlxplant.save('/content/new_drive/MyDrive/ctrlxplantfinal.keras')
 # load the traindmodel ( controller and plant together ) 
-trainedfinal = tf.keras.models.load_model('/content/new_drive/MyDrive/ctrlxplantfinal.keras') ## please adjust the path as you need
+## please adjust the path as you need
+trainedfinal = tf.keras.models.load_model('/content/new_drive/MyDrive/ctrlxplantfinal.keras') 
 
 # saving the controller network seperately
 ctrl_new = Sequential()
@@ -230,27 +227,8 @@ plt.legend()
 plt.show()
 
 plt.plot(time, outputn2, label='Force')
+plt.ylabel('Force')
+plt.title('Controller generated Force')
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
