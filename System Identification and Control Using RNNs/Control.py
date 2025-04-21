@@ -223,6 +223,7 @@ plt.plot(time, outputn1, label='Position')
 plt.plot(time, setpoint1 * np.ones_like(time), label='Setpoint', linestyle='--')
 #plt.xlabel('Time')
 plt.ylabel('Position')
+plt.title('Neural Net Controller Performance')
 plt.legend()
 plt.show()
 
