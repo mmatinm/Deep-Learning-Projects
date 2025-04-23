@@ -49,7 +49,7 @@ Compiled with:
 
 ### Confusion Matrix
 
-![Confusion Matrix](./confusion_matrix.png)
+![Confusion Matrix](./images/confusion_matrix.png)
 
 ### Per-Class Accuracy
 
