@@ -15,9 +15,11 @@ from tensorflow.keras.regularizers import l2
 import keras_tuner as kt
 from tensorflow.keras.optimizers import Adam
 
-####### Load Dataset
-file_path_train = r"D:\mitbih_train.csv"  #adjust the path
-file_path_test = r"D:\mitbih_test.csv"    #adjust the path
+####### Load ECG datasets (adjust file paths as needed)
+# Each row is a single ECG beat with 187 time steps and a class label
+
+file_path_train = r"D:\mitbih_train.csv"  
+file_path_test = r"D:\mitbih_test.csv"    
 dftrain = pd.read_csv(file_path_train)
 dftest = pd.read_csv(file_path_test)
 
@@ -34,7 +36,7 @@ id_to_label = {
     4: "Fusion of paced and normal"
 }
 
-#plotting a pie chart to show the distribution of the classes in the dataset
+#Visualize class distribution in the training dataset
 train_labels = dftrain.iloc[:, -1]
 test_labels = dftest.iloc[:, -1]
 
@@ -50,7 +52,7 @@ plt.axis('equal')
 plt.show()
 
 '''
-#### ploting 3 samples of each of the classes in the train dataset (optional)
+#### Optional: Plot 3 sample ECG beats from each class
 ecg_signals = dftrain.iloc[:, :-1].values
 labels = dftrain.iloc[:, -1].values
 
@@ -78,7 +80,7 @@ plt.show()
 
 '''
 
-######### pre processsing data 
+######### preprocesssing data 
 
 X_train = dftrain.iloc[:, :-1].values
 y_train = dftrain.iloc[:, -1].values
@@ -145,7 +147,7 @@ class_weights_dict = dict(enumerate(class_weights))
 print(class_weights_dict)
 '''
 
-#tuned class weights
+# Manually tuned class weights
 class_weights_dict = {
     0: 1.1,   # Normal
     1: 30.0,   # Atrial Premature
@@ -204,14 +206,14 @@ plt.legend(['Train', 'Validation'], loc='upper left')
 plt.tight_layout()
 plt.show()
 
-# saving the trained model ( adjust the path )
+# Save the trained model (adjust file path as needed)
 model.save('D:\ECG.keras')
 
-# loading the trained model ( adjust the path )
+# Load the trained model (adjust file path as needed)
 model = tf.keras.models.load_model('D:\ECG.keras')
 
 
-################### evaluatong model performance
+################### Evaluatong model performance
 
 y_pred_probs = model.predict(X_test_norm)
 y_pred = np.argmax(y_pred_probs, axis=1)
@@ -251,7 +253,7 @@ for class_id, class_name in id_to_label.items():
     print(f"{class_name}: Accuracy = {class_acc:.4f}")
 
 
-############### hyper parameter tuning
+############### hyperparameter tuning
 
 def build_model(hp):
     model = Sequential()
