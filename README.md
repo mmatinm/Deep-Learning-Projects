@@ -19,6 +19,5 @@ Covers system identification, classical control, and neural-network-based contro
 Classify ECG beats from the MIT-BIH Arrhythmia dataset into five categories using a deep neural network.
 Includes data preprocessing, class balancing, hyperparameter tuning with Keras Tuner, and performance evaluation.
 
-Techniques: Fully connected neural networks, dropout, batch normalization, L2 regularization
-
-Libraries: TensorFlow, Keras, Keras Tuner, scikit-learn
+- Techniques: Fully connected neural networks, dropout, batch normalization, L2 regularization
+- Libraries: TensorFlow, Keras, Keras Tuner, scikit-learn
