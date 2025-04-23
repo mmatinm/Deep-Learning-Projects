@@ -15,8 +15,7 @@ Covers system identification, classical control, and neural-network-based contro
 - Libraries: TensorFlow, Keras, Control Systems, SciPy
 
 ---
-### [ECG Beat Classification using Deep Learning]
-(./ECG%Beat%Classification%using%Deep%Learning)
+### [ECG Beat Classification using Deep Learning](./ECG%Beat%Classification%using%Deep%Learning)
 Classify ECG beats from the MIT-BIH Arrhythmia dataset into five categories using a deep neural network.
 Includes data preprocessing, class balancing, hyperparameter tuning with Keras Tuner, and performance evaluation.
 
