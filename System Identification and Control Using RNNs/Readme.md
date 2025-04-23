@@ -6,9 +6,7 @@ A hands-on project that simulates a mass-spring-damper system and uses simple RN
 - [Description](#description)
 - [Features](#features)
 - [Prerequisites](#prerequisites)
-- [Installation](#installation)
 - [Project Structure](#project-structure)
-- [Usage](#usage)
 - [Results](#results)
 - [Contributing](#contributing)
 
@@ -38,21 +36,6 @@ The dynamic system is a mass connected to a spring and damper, driven by differe
 - `tensorflow`, `keras`
 - `control`
 
-Install all with:
-```bash
-pip install control numpy pandas matplotlib scipy scikit-learn tensorflow keras
-```
-
-## Installation
-
-Clone this repo:
-```bash
-git clone https://github.com/yourusername/your-repo-name.git
-cd your-repo-name
-```
-
-Install the prerequisites (see above).
-
 ## Project Structure
 
 ```
@@ -61,32 +44,9 @@ Install the prerequisites (see above).
 /trained_SRNN_model.keras       # Saved RNN model for system identification
 /ctrlxplantfinal.keras          # Saved combined controller + plant model
 /ctrl_final.keras               # Saved standalone neural-network controller
-/model_checkpoint.keras         # Checkpoints saved during RNN training
 /images/                        # Folder to store plot images for README
 README.md                       # This file
-LICENSE                         # License info
 ```
-
-## Usage
-
-### 1. Identify the System (Plant)
-
-```bash
-python "System Identification.py"
-```
-
-Uncomment the plotting section in that script if you want to see the training/validation curves.
-
-### 2. Control the System
-
-Make sure the paths to `trained_SRNN_model.keras`, `ctrlxplantfinal.keras`, and `ctrl_final.keras` in `Control.py` point to your model files.
-
-Then run:
-```bash
-python "Control.py"
-```
-
-You’ll get plots showing how well the controller drives the mass to the setpoint, along with error metrics (IAE, ISE, RMSE).
 
 ## Results
 
@@ -104,13 +64,7 @@ Here are the main plots illustrating the system identification and control perfo
 ### Position Control Performance
 ![Position Control](images/position_control.png)
 
-Make sure you save your generated images into the `/images` folder with these exact names.
 
 ## Contributing
 
 Feel free to open issues or send pull requests. Contributions like fixing typos, improving docs, or adding new features are always welcome!
-
-## License
-
-This project is available under the MIT License. See [LICENSE](LICENSE) for details.
-
