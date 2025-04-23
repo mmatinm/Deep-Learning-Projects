@@ -13,7 +13,6 @@ Covers system identification, classical control, and neural-network-based contro
 
 - Techniques: SimpleRNN, LSTM, supervised learning
 - Libraries: TensorFlow, Keras, Control Systems, SciPy
-- [Go to project ➔](./System%20Identification%20and%20Control%20Using%20RNNs)
 
 ---
 
