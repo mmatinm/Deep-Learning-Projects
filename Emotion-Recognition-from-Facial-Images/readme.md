@@ -71,11 +71,23 @@ class_weights = [3.5, 6.5, 2.5, 5, 1.2, 0.3, 4.7, 1.2]
 ## Feature Map Visualization
 Feature maps from a selected convolutional layer are visualized to better understand what the model is learning from input images.
 
+
 ---
 ## Real-Time Webcam Inference
--Captures 10 images and a short video using your webcam. 
--Each image is:
-  -Converted to grayscale
-  -Resized and normalized
-  -Passed through the trained model
--Outputs class prediction and confidence for each image
+- Captures 10 images and a short video using your webcam 
+- Each image is:
+  - Converted to grayscale
+  - Resized and normalized
+  - Passed through the trained model
+- Outputs class prediction and confidence for each image
+
+---
+
+## Final Model Characteristics
+Model saved as: emotion.keras
+Input size: 48x48
+Weighted test accuracy: 0.88
+
+confusion matrix:
+
+
