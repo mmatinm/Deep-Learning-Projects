@@ -21,3 +21,10 @@ Includes data preprocessing, class balancing, hyperparameter tuning with Keras T
 
 - Techniques: Fully connected neural networks, dropout, batch normalization, L2 regularization
 - Libraries: TensorFlow, Keras, Keras Tuner, scikit-learn
+
+---
+## [Emotion-Recognition-from-Facial-Images](./Emotion-Recognition-from-Facial-Images)
+This project implements a deep learning pipeline to recognize human emotions from facial images using convolutional neural networks (CNNs). It covers data preprocessing (including RGB to grayscale conversion), augmentation, model training with a custom weighted loss function to handle severe class imbalance, and comprehensive evaluation with confusion matrices and classification reports. The project also includes visualization of learned feature maps and real-time emotion prediction using webcam input.
+
+- Techniques: CNN, weighted categorical crossentropy, data augmentation, feature visualization
+- Libraries: TensorFlow, Keras, OpenCV, scikit-learn, matplotlib
